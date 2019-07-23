@@ -1,0 +1,179 @@
+the login works like uese two calls 
+
+1) balancer call which will return this
+{
+    "verCode": 14,
+    "verMessage": "okSystem is down for maintenance",
+    "heroku": "https://luis1.herokuapp.com/",
+    "id": 1
+}
+    NOTE1: you need to find a way like in android  to know what version of app
+    if version of app installed in device is different than vercode.. you should force user to update app
+
+	NOTE2:   if vermessage.indexof("ok")==-1  then  you should display message .. system is down come back later-in-android
+	
+	
+	NOTE3:    if everything is ok then the heroku server used thoughout the app for api calls is the one returned in field heroku
+	
+	upon validating credentials the user is let in see code below for reference
+
+
+
+
+
+
+
+ private void balancer(){// wiki this final as paramter to be used in innerclass
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!=null) {
+            String fromsplash = bundle.getString("fromsplash");
+            if ("yes".equals(fromsplash)){
+                getAll();
+                return;
+            }
+        }
+        System.out.println("getversion......");
+        String url = Utils.herokuBalancer+"version/1"; //watersu125 please hardcode utils.herokubalancer to https://luis1.herokuapp.com
+        final Version version=new Version();
+        Utils.showInterstitial(LoginActivity.this);
+        StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+            @Override
+            public void onResponse(String s) {
+                System.out.println("Returned vesion:"+s);
+                Utils.hideInterstitial();
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    version.importFromJson(jsonObject);
+                    Utils.herokuUrl=version.heroku;//watersu125  here you set the api end point as per the balancer
+                    getAll();
+
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Utils.hideInterstitial();
+                global.removePref();
+                if (volleyError.networkResponse!=null)
+                    global.show2Dialog("Load Balancer Error : "+volleyError.networkResponse.statusCode,LoginActivity.this);
+                else
+                    global.show2Dialog("Load Balancer Error, please try again:"+volleyError.getMessage(),LoginActivity.this);
+
+
+            }
+        }) {
+
+        };
+
+        RequestQueue rQueue = Volley.newRequestQueue(LoginActivity.this);
+        rQueue.add(request);
+
+    }
+
+    private void getAll(){
+
+        String url = Utils.herokuUrl+"login";
+        //  Toast.makeText(LoginActivity.this,"Now using: "+Utils.herokuUrl,Toast.LENGTH_SHORT).show();
+
+        showInterstitial(LoginActivity.this);
+
+        StringRequest request = new StringRequest(
+                Request.Method.GET, url, new Response.Listener<String>(){
+
+
+
+
+            @Override
+            public void onResponse(String s) {
+                hideInterstitial();
+                try {
+                    System.out.println("user info :"+s);
+                    JSONObject jsonObject = new JSONObject(s);
+                    signupReturn.importFromJson(jsonObject);
+                    signup.userCode=signupReturn.userCode;
+                    signup.id=signupReturn.id;
+                    signup.email=signupReturn.email;
+                    signup.father=signupReturn.father;//father is used for advocate
+                    signup.mother=signupReturn.mother;
+                    System.out.println("special user"+signupReturn.mother);//mother is used as special user value Y
+                    signup.paname=signupReturn.paname;
+                    signup.phone=signupReturn.phone;
+                    signup.paorg=signupReturn.paorg;
+                    signup.paarea=signupReturn.paarea;
+                    signup.padesc=signupReturn.padesc;
+
+                    signup.signType=signupReturn.signType;
+                    global.setPrefString("pampUser", signup.exportToJson().toString());
+                    global.setPrefString("userName",signup.userName);
+                    global.setProfileUser(signup.userName);
+
+                    Intent intentLogin;
+                    if (!"".equals(signup.paname))
+                        //https://stackoverflow.com/questions/28477091/how-to-save-activity-class-as-a-variable-to-use-it-later-in-android  nice
+                        intentLogin = new Intent(LoginActivity.this,  MainActivity.class);
+                    else
+                        intentLogin = new Intent(LoginActivity.this,  MainActivity.class);
+
+                    MainActivity.setCurrentUser(signup);
+                    // MainActivityAdv.setCurrentUser(signup);
+                    //     intentLogin.putExtra("fromsplash","yes");
+                    startActivity(intentLogin);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                    Toast.makeText(LoginActivity.this,"Invalid user",Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                hideInterstitial();
+                if (volleyError.networkResponse!=null) {
+                    if (volleyError.networkResponse.statusCode == 404) {
+                        global.show2Dialog("User not found",LoginActivity.this);
+                    } else
+                    if (volleyError.networkResponse.statusCode == 401) {
+                        global.show2Dialog("Not Authorized, It is also possible that the database reached max number of connection. Please try again",LoginActivity.this);
+                    }
+                    else
+                        global.show2Dialog("process failed with error code:"+volleyError.networkResponse,LoginActivity.this);
+                }
+                else {
+
+                    global.show2Dialog("Time out error, looks like one of our servers is down. This is in beta test, please try again to use another server.", LoginActivity.this);
+                }
+
+            }
+        }) {
+
+            //      @Override
+            //      protected Response<String> parseNetworkResponse(NetworkResponse response) {
+            //        int mStatusCode = response.statusCode;
+            //        System.out.println("this is for 200 errors like 204 TODO how to handle no content");
+            //       return super.parseNetworkResponse(response);
+            //    }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<String, String>();
+                String creds = String.format("%s:%s", signup.userName, signup.password);
+                String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
+                params.put("Authorization", auth);
+                return params;
+
+            }
+        };
+
+
+        RequestQueue rQueue = Volley.newRequestQueue(LoginActivity.this);
+        rQueue.add(request);
+
+    }
