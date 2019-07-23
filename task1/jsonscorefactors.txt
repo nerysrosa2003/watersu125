@@ -1,0 +1,122 @@
+partname is level 0
+negative factors, postive factors is hardcoded level 1
+factordesc is level 3
+
+https://luis1.herokuapp.com/factor?userName=admin
+
+
+
+[
+    {
+        "partName": "ear check",
+        "goods": [
+            {
+                "id": 442211,
+                "factorDesc": "You have 1 pending visit(s)",
+                "userName": "admin",
+                "factorGood": "Y",
+                "caseNumber": 1661,
+                "weight": 1
+            },
+            {
+                "id": 442231,
+                "factorDesc": "You are not scheduled for any procedure.",
+                "userName": "admin",
+                "factorGood": "Y",
+                "caseNumber": 1661,
+                "weight": 1
+            }
+        ],
+        "bads": [
+            {
+                "id": 442191,
+                "factorDesc": "You have not read your PAPER medical records for visit date:2019-07-22 with Lucy D. Doe-retina specialist",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1661,
+                "weight": -1
+            },
+            {
+                "id": 442201,
+                "factorDesc": "You don't have any alternate opinion",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1661,
+                "weight": -1
+            },
+            {
+                "id": 442221,
+                "factorDesc": "You have 1 pending visit(s) that you missed the date",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1661,
+                "weight": -1
+            }
+        ],
+        "id": 1661
+    },
+    {
+        "partName": "check my retina",
+        "goods": [
+            {
+                "id": 442271,
+                "factorDesc": "You have 1 alternate opinion(s)",
+                "userName": "admin",
+                "factorGood": "Y",
+                "caseNumber": 1631,
+                "weight": 1
+            },
+            {
+                "id": 442281,
+                "factorDesc": "You have 2 pending visit(s)",
+                "userName": "admin",
+                "factorGood": "Y",
+                "caseNumber": 1631,
+                "weight": 1
+            },
+            {
+                "id": 442301,
+                "factorDesc": "You are not scheduled for any procedure.",
+                "userName": "admin",
+                "factorGood": "Y",
+                "caseNumber": 1631,
+                "weight": 1
+            }
+        ],
+        "bads": [
+            {
+                "id": 442241,
+                "factorDesc": "You have not read your PAPER medical records for visit date:2019-03-09 with Kat Perez-optometrist",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1631,
+                "weight": -1
+            },
+            {
+                "id": 442251,
+                "factorDesc": "You have not read your PAPER medical records for visit date:2019-07-22 with Lucy D. Doe-retina specialist",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1631,
+                "weight": -1
+            },
+            {
+                "id": 442261,
+                "factorDesc": "E78.2 no bebas cafe ni romo",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1631,
+                "weight": -1
+            },
+            {
+                "id": 442291,
+                "factorDesc": "You have 2 pending visit(s) that you missed the date",
+                "userName": "admin",
+                "factorGood": "N",
+                "caseNumber": 1631,
+                "weight": -1
+            }
+        ],
+        "id": 1631
+    }
+]
