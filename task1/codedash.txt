@@ -1,0 +1,109 @@
+ private void getAll(){
+        if (busy){
+            System.out.println("getallmainacti busy");
+            return;
+        }
+        busy=true;
+        final DashboardList lista=new DashboardList();
+        String url = Utils.herokuUrl+"dash/"+ global.getProfileUser();
+        Utils.showInterstitial(context);
+
+        StringRequest request = new StringRequest(
+                Request.Method.GET, url, new Response.Listener<String>(){
+
+            @Override
+            public void onResponse(String s) {
+                Utils.hideInterstitial();
+
+                s="{dashboards:"+s+"}";
+                try {
+                    JSONObject jsonObject = new JSONObject(s);
+                    lista.importFromJson(jsonObject);
+
+                    for (Dashboard d:lista.dashboards) {
+                        if (d.position==10) {
+                            finalScore=d.cantidad;
+                        }
+                        else
+                            cuadros.get(d.position-1).setStrcount(Integer.toString(d.cantidad));
+                    }
+
+                    rvHomeScreenMenus.setAdapter(dashBoardItemAdapter);
+
+                    score.setText(Integer.toString(finalScore));
+                    if (finalScore>=725){
+                        scoreflag.setText("Excellent");
+                        scorepic.setImageResource(R.drawable.score725);
+                    }
+                    else if (finalScore>=675){
+                        scoreflag.setText("Good");
+                        scorepic.setImageResource(R.drawable.score675);
+                    }
+                    else if (finalScore>=625) {
+                        scoreflag.setText("Fair");
+                        scorepic.setImageResource(R.drawable.score625);
+                    }
+                    else if (finalScore>=525){
+                        scoreflag.setText("Bad");
+                        scorepic.setImageResource(R.drawable.score525);
+                    }
+                    else if (finalScore>=425) {
+                        scoreflag.setText("Reckless");
+                        scorepic.setImageResource(R.drawable.score425);
+                    }
+                    else  scoreflag.setText("None");
+
+
+                }
+                catch (Exception e){
+                    Toast.makeText(context, "Max number of queries per hour reach, please try again later ", Toast.LENGTH_LONG).show();
+                    logout();
+                    e.printStackTrace();
+
+                }
+
+                busy=false;
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Utils.hideInterstitial();
+                if (volleyError.networkResponse!=null) {
+                    Toast.makeText(context, "Main activity:Server error:"+volleyError.networkResponse.statusCode+" try again later", Toast.LENGTH_LONG).show();
+                    logout();
+                }
+                else {
+                    Toast.makeText(context, "Server Error, Please try again, if problem persists please email support@epatientindex.com ", Toast.LENGTH_LONG).show();
+                    logout();
+                }
+                busy=false;
+            }
+        }) {
+
+            //    @Override
+            //       protected Response<String> parseNetworkResponse(NetworkResponse response) {
+            //         int mStatusCode = response.statusCode;
+            //        System.out.println("this is for 200 errors like 204 TODO how to handle no content");
+            //        return super.parseNetworkResponse(response);
+            //      }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<String, String>();
+                String creds = String.format("%s:%s", MainActivity.getCurrentUser().userName, MainActivity.getCurrentUser().password);
+                String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
+                params.put("Authorization", auth);
+                return params;
+
+            }
+        };
+
+
+        RequestQueue rQueue = Volley.newRequestQueue(context);
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                (int) TimeUnit.SECONDS.toMillis(Constants.RETRY),
+                0,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        rQueue.add(request);
+
+    }
